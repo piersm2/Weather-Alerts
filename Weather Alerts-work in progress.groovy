@@ -16,21 +16,27 @@
 definition(
     name: "My Weather Alerts",
     namespace: "jwwhite001",
-    author: "Jim White",
+    author: "Jim White, mod by: Matt Pierson",
     description: "Checks Weather Underground For Alerts and Sends Notification",
     category: "My Apps",
-    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
-    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+    iconUrl: "https://s3.amazonaws.com/sticons/SevereWeather.png",
+    iconX2Url: "https://s3.amazonaws.com/sticons/SevereWeather%402x.png",
+    iconX3Url: "https://s3.amazonaws.com/sticons/SevereWeather%402x.png")
 
 import groovy.json.JsonSlurper 
 
 preferences {
-		section("Manual Weather Check") {
- 		      input(name: "manlTrigger", title: "Manual Trigger To Repeat Weather Alert", type: "capability.switch", multiple: false, required: false)
+    section("Manual Weather Check") {
+ 		      input(name: "manlTrigger", title: "Manual Trigger To Repeat Weather Alert", type: "capability.switch", multiple: false, required: true)
 		}	
-		section("Notification Device") {
-	          input(name: "speaker", title: "Speaker", type: "capability.audioNotification", multiple: true, required: true)
+    section("Notification Device") {
+	          input(name: "speaker", title: "Alert Speaker", type: "capability.audioNotification", multiple: true, required: true)
+		}
+    section("Significances") {
+        input(name: "sigs", type: "enum", title: "Significance Types", multiple: true, options: ["Warning","Watch","Advisory","Statement","Forecast","Outlook","Synopsis"])
+            }
+    section("Notification Types") {
+        input(name: "notif", type: "enum", title: "Phenomena Types", multiple: true, options: ["Ashfall","Air Stagnation","Blowing Snow","Blizzard","Brisk Wind","Coastal Flood","Dust Storm","Blowing Dust","Extreme Cold","Excessive Heat","Extreme Wind","Areal Flood","Flash Flood","Dense Fog","Flood","Frost","Fire Weather","Freeze","Gale","Hurricane Froce Wind","Inland Hurricane","Heavy Snow","Heat","Hurricane","High Wind","Hydrologic","Hard Freeze","Sleet","Ice Storm","Lake Effect Snow and Blowing Snow","Lake Effect Snow","Low Water","Lakeshore Flood","Lake Wind","Marine","Small Craft for Rough Bar","Snow and Blowing Snow","Small Craft","Hazardous Seas","Small Craft for Winds","Dense Smoke","Snow","Storm","High Surf","Severe Thunderstorm","Small Craft for Hazardous Seas","Inland Tropical Storm","Tornado","Tropical Storm","Tsunami","Typhoon","Ice Accretion","Wind Chill","Wind","Winter Strom","Winter Weather","Freezing Fog","Freezing Rain"])
 		}
 }
 
@@ -54,7 +60,8 @@ def initialize() {
 	state.signific = ["","","",""]
 	Alerts()
 	subscribe(manlTrigger, "switch.on", manlAlerts)
-    runEvery15Minutes(Alerts)
+    runEvery5Minutes(Alerts)
+    log.debug notif.Blizzard = ["BZ"]
 }
 
 // handle commands
@@ -68,7 +75,7 @@ def parseAlertTime(s) {
 
 
 def Alerts(evt)  {
-	def alerts = getTwcAlerts("36.67,-93.34") 
+	def alerts = getTwcAlerts("lat,lon")
         if (alerts) {
             alerts.eachWithIndex {alert,index ->
                 def msg = alert.headlineText
@@ -83,8 +90,8 @@ def Alerts(evt)  {
             def alerttype = alert.phenomena
             def signif = alert.significance
             if (alerttype != state.prevalerts[index] || signif != state.signific[index]) {
-       			if (alerttype == "TO" || alerttype == "IS" || alerttype == "WS" || alerttype == "WW" || alerttype == "ZR" || alerttype == "SV") {
-                	if (alert.significance == "W" || alert.significance == "A") {
+       			if (alerttype == "TO" || alerttype == "SV") {
+                	if (alert.significance == "W") {
 		     	        def msg1 = msg.replaceAll("SUN","SUNDAY")
 	    		        def msg2 = msg1.replaceAll("MON","MONDAY")
 						def msg3 = msg2.replaceAll("TUE","TUESDAY")
@@ -109,7 +116,7 @@ def Alerts(evt)  {
 
 
 def manlAlerts(evt)  {
-	def alerts = getTwcAlerts("36.67,-93.34") 
+	def alerts = getTwcAlerts("lat,lon")
         if (alerts) {
             alerts.eachWithIndex {alert,index ->
                 def msg = alert.headlineText
