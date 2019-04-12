@@ -150,3 +150,4 @@ speaker.each {device ->
 		device.playText("test device")
 
 	}
+}
