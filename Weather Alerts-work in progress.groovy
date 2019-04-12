@@ -36,7 +36,7 @@ preferences {
         input(name: "sigs", type: "enum", title: "Significance Types", multiple: true, options: [["W":"Warning"],["A":"Watch"],["Y":"Advisory"],["S":"Statement"],["F":"Forecast"],["O":"Outlook"],["N":"Synopsis"]])
             }
     section("Notification Types") {
-        input(name: "notif", type: "enum", title: "Phenomena Types", multiple: true, options: [["AF":"Ashfall"],["AS":"Air Stagnation"],["BS":"Blowing Snow"],["BZ":"Blizzard"],["BW":"Brisk Wind"],["CF":"Coastal Flood"],["DS":"Dust Storm"],["DU":"Blowing Dust"],["EC":"Extreme Cold"],["EH":"Excessive Heat"],["EW":"Extreme Wind"],["FA":"Areal Flood"],["FF":"Flash Flood"],["FG":"Dense Fog"],["FL":"Flood"],["FR":"Frost"],["FW":"Fire Weather"],["FZ":"Freeze"],["GL":"Gale"],["HF":"Hurricane Froce Wind"],["HI":"Inland Hurricane"],["HS":"Heavy Snow"],["HT":"Heat"],["HU":"Hurricane"],["HW":"High Wind"],["HY":"Hydrologic"],["HZ":"Hard Freeze"],["IP":"Sleet"],["IS":"Ice Storm"],["LB":"Lake Effect Snow and Blowing Snow"],["LE":"Lake Effect Snow"],["LO":"Low Water"],["LS":"Lakeshore Flood"],["LW":"Lake Wind"],["MA":"Marine"],["RB":"Small Craft for Rough Bar"],["SB":"Snow and Blowing Snow"],["SC":"Small Craft"],["SE":"Hazardous Seas"],["SI":"Small Craft for Winds"],["SM":"Dense Smoke"],["SN":"Snow"],["SR":"Storm"],["SU":"High Surf"],["SV":"Severe Thunderstorm"],["SW":"Small Craft for Hazardous Seas"],["TI":"Inland Tropical Storm"],["TO":"Tornado"],["TR":"Tropical Storm"],["TS":"Tsunami"],["TY":"Typhoon"],["UP":"Ice Accretion"],["WC":"Wind Chill"],["WI":"Wind"],["WS":"Winter Strom"],["WW":"Winter Weather"],["ZF":"Freezing Fog"],["ZR":"Freezing Rain"]])
+        input(name: "notif", type: "enum", title: "Phenomena Types", multiple: true, options: [["AS":"Air Stagnation"],["FA":"Areal Flood"],["AF":"Ashfall"],["BZ":"Blizzard"],["DU":"Blowing Dust"],["BS":"Blowing Snow"],["BW":"Brisk Wind"],["CF":"Coastal Flood"],["FG":"Dense Fog"],["SM":"Dense Smoke"],["DS":"Dust Storm"],["EH":"Excessive Heat"],["EC":"Extreme Cold"],["EW":"Extreme Wind"],["FW":"Fire Weather"],["FF":"Flash Flood"],["FL":"Flood"],["FZ":"Freeze"],["ZF":"Freezing Fog"],["ZR":"Freezing Rain"],["FR":"Frost"],["GL":"Gale"],["HZ":"Hard Freeze"],["SE":"Hazardous Seas"],["HT":"Heat"],["HS":"Heavy Snow"],["SU":"High Surf"],["HW":"High Wind"],["HU":"Hurricane"],["HF":"Hurricane Froce Wind"],["HY":"Hydrologic"],["UP":"Ice Accretion"],["IS":"Ice Storm"],["HI":"Inland Hurricane"],["TI":"Inland Tropical Storm"],["LE":"Lake Effect Snow"],["LB":"Lake Effect Snow and Blowing Snow"],["LW":"Lake Wind"],["LS":"Lakeshore Flood"],["LO":"Low Water"],["MA":"Marine"],["SV":"Severe Thunderstorm"],["IP":"Sleet"],["SC":"Small Craft"],["SW":"Small Craft for Hazardous Seas"],["RB":"Small Craft for Rough Bar"],["SI":"Small Craft for Winds"],["SN":"Snow"],["SB":"Snow and Blowing Snow"],["SR":"Storm"],["TO":"Tornado"],["TR":"Tropical Storm"],["TS":"Tsunami"],["TY":"Typhoon"],["WI":"Wind"],["WC":"Wind Chill"],["WS":"Winter Strom"],["WW":"Winter Weather"]])
 		}
 }
 
@@ -150,6 +150,3 @@ speaker.each {device ->
 		device.playText("test device")
 
 	}
-
-
- }
