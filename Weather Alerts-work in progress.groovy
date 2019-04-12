@@ -33,10 +33,10 @@ preferences {
 	          input(name: "speaker", title: "Alert Speaker", type: "capability.audioNotification", multiple: true, required: true)
 		}
     section("Significances") {
-        input(name: "sigs", type: "enum", title: "Significance Types", multiple: true, options: ["Warning","Watch","Advisory","Statement","Forecast","Outlook","Synopsis"])
+        input(name: "sigs", type: "enum", title: "Significance Types", multiple: true, options: [["W":"Warning"],["A":"Watch"],["Y":"Advisory"],["S":"Statement"],["F":"Forecast"],["O":"Outlook"],["N":"Synopsis"]])
             }
     section("Notification Types") {
-        input(name: "notif", type: "enum", title: "Phenomena Types", multiple: true, options: ["Ashfall","Air Stagnation","Blowing Snow","Blizzard","Brisk Wind","Coastal Flood","Dust Storm","Blowing Dust","Extreme Cold","Excessive Heat","Extreme Wind","Areal Flood","Flash Flood","Dense Fog","Flood","Frost","Fire Weather","Freeze","Gale","Hurricane Froce Wind","Inland Hurricane","Heavy Snow","Heat","Hurricane","High Wind","Hydrologic","Hard Freeze","Sleet","Ice Storm","Lake Effect Snow and Blowing Snow","Lake Effect Snow","Low Water","Lakeshore Flood","Lake Wind","Marine","Small Craft for Rough Bar","Snow and Blowing Snow","Small Craft","Hazardous Seas","Small Craft for Winds","Dense Smoke","Snow","Storm","High Surf","Severe Thunderstorm","Small Craft for Hazardous Seas","Inland Tropical Storm","Tornado","Tropical Storm","Tsunami","Typhoon","Ice Accretion","Wind Chill","Wind","Winter Strom","Winter Weather","Freezing Fog","Freezing Rain"])
+        input(name: "notif", type: "enum", title: "Phenomena Types", multiple: true, options: [["AF":"Ashfall"],["AS":"Air Stagnation"],["BS":"Blowing Snow"],["BZ":"Blizzard"],["BW":"Brisk Wind"],["CF":"Coastal Flood"],["DS":"Dust Storm"],["DU":"Blowing Dust"],["EC":"Extreme Cold"],["EH":"Excessive Heat"],["EW":"Extreme Wind"],["FA":"Areal Flood"],["FF":"Flash Flood"],["FG":"Dense Fog"],["FL":"Flood"],["FR":"Frost"],["FW":"Fire Weather"],["FZ":"Freeze"],["GL":"Gale"],["HF":"Hurricane Froce Wind"],["HI":"Inland Hurricane"],["HS":"Heavy Snow"],["HT":"Heat"],["HU":"Hurricane"],["HW":"High Wind"],["HY":"Hydrologic"],["HZ":"Hard Freeze"],["IP":"Sleet"],["IS":"Ice Storm"],["LB":"Lake Effect Snow and Blowing Snow"],["LE":"Lake Effect Snow"],["LO":"Low Water"],["LS":"Lakeshore Flood"],["LW":"Lake Wind"],["MA":"Marine"],["RB":"Small Craft for Rough Bar"],["SB":"Snow and Blowing Snow"],["SC":"Small Craft"],["SE":"Hazardous Seas"],["SI":"Small Craft for Winds"],["SM":"Dense Smoke"],["SN":"Snow"],["SR":"Storm"],["SU":"High Surf"],["SV":"Severe Thunderstorm"],["SW":"Small Craft for Hazardous Seas"],["TI":"Inland Tropical Storm"],["TO":"Tornado"],["TR":"Tropical Storm"],["TS":"Tsunami"],["TY":"Typhoon"],["UP":"Ice Accretion"],["WC":"Wind Chill"],["WI":"Wind"],["WS":"Winter Strom"],["WW":"Winter Weather"],["ZF":"Freezing Fog"],["ZR":"Freezing Rain"]])
 		}
 }
 
@@ -61,7 +61,6 @@ def initialize() {
 	Alerts()
 	subscribe(manlTrigger, "switch.on", manlAlerts)
     runEvery5Minutes(Alerts)
-    log.debug notif.Blizzard = ["BZ"]
 }
 
 // handle commands
@@ -75,7 +74,7 @@ def parseAlertTime(s) {
 
 
 def Alerts(evt)  {
-	def alerts = getTwcAlerts("lat,lon")
+	def alerts = getTwcAlerts("46.916505,-96.792531")
         if (alerts) {
             alerts.eachWithIndex {alert,index ->
                 def msg = alert.headlineText
@@ -90,8 +89,8 @@ def Alerts(evt)  {
             def alerttype = alert.phenomena
             def signif = alert.significance
             if (alerttype != state.prevalerts[index] || signif != state.signific[index]) {
-       			if (alerttype == "TO" || alerttype == "SV") {
-                	if (alert.significance == "W") {
+       			if (alerttype == "${notif}") {
+                	if (alert.significance == "${sigs}") {
 		     	        def msg1 = msg.replaceAll("SUN","SUNDAY")
 	    		        def msg2 = msg1.replaceAll("MON","MONDAY")
 						def msg3 = msg2.replaceAll("TUE","TUESDAY")
@@ -116,7 +115,7 @@ def Alerts(evt)  {
 
 
 def manlAlerts(evt)  {
-	def alerts = getTwcAlerts("lat,lon")
+	def alerts = getTwcAlerts("46.916505,-96.792531")
         if (alerts) {
             alerts.eachWithIndex {alert,index ->
                 def msg = alert.headlineText
