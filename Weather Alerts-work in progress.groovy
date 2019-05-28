@@ -26,11 +26,14 @@ definition(
 import groovy.json.JsonSlurper 
 
 preferences {
+    section("Enter Zip Code") {
+            input(name: "zipCode", title: "ZipCode", type: "string", mulitple: false, required: true)
+    }
     section("Manual Weather Check") {
- 		      input(name: "manlTrigger", title: "Manual Trigger To Repeat Weather Alert", type: "capability.switch", multiple: false, required: true)
+ 		      input(name: "manlTrigger", title: "Manual Trigger To Repeat Weather Alert", type: "capability.switch", multiple: false, required: false)
 		}	
     section("Notification Device") {
-	          input(name: "speaker", title: "Alert Speaker", type: "capability.audioNotification", multiple: true, required: true)
+	          input(name: "speaker", title: "Alert Speaker", type: "capability.audioNotification", multiple: true, required: false)
 		}
     section("Significances") {
         input(name: "sigs", type: "enum", title: "Significance Types", multiple: true, options: [["W":"Warning"],["A":"Watch"],["Y":"Advisory"],["S":"Statement"],["F":"Forecast"],["O":"Outlook"],["N":"Synopsis"]])
@@ -74,23 +77,32 @@ def parseAlertTime(s) {
 
 
 def Alerts(evt)  {
-	def alerts = getTwcAlerts("46.916505,-96.792531")
+    def result = getTwcLocation(zipCode)
+    def latitude = result.location['latitude']
+    def longitude = result.location['longitude']
+
+	def alerts = getTwcAlerts("${latitude},${longitude}")
         if (alerts) {
             alerts.eachWithIndex {alert,index ->
-                def msg = alert.headlineText
-                if (alert.effectiveTimeLocal && !msg.contains(" from ")) {
-                    msg += " from ${parseAlertTime(alert.effectiveTimeLocal).format("E hh:mm a", TimeZone.getTimeZone(alert.effectiveTimeLocalTimeZone))}"
+                def key = alert.detailKey
+                def detail = getTwcAlertDetail(key)
+                def msg = detail.alertDetail['headlineText']
+                def alerttext = detail.alertDetail['texts']
+                def textdescription = alerttext.description
+                def textoverview = alerttext.overview
+                if (detail.alertDetail['effectiveTimeLocal'] && !msg.contains(" from ")) {
+                    msg += " from ${parseAlertTime(detail.alertDetail['effectiveTimeLocal']).format("E hh:mm a", TimeZone.getTimeZone(detail.alertDetail['effectiveTimeLocal']))}"
                 }
-                if (alert.expireTimeLocal && !msg.contains(" until ")) {
-                    msg += " until ${parseAlertTime(alert.expireTimeLocal).format("E hh:mm a", TimeZone.getTimeZone(alert.expireTimeLocalTimeZone))}"
+                if (detail.alertDetail['expireTimeLocal'] && !msg.contains(" until ")) {
+                    msg += " until ${parseAlertTime(detail.alertDetail['expireTimeLocal']).format("E hh:mm a", TimeZone.getTimeZone(detail.alertDetail['expireTimeLocal']))}"
                 }
 			log.debug "${msg}"
             log.debug "$state.prevalerts"
             def alerttype = alert.phenomena
             def signif = alert.significance
             if (alerttype != state.prevalerts[index] || signif != state.signific[index]) {
-       			if (alerttype == "${notif}") {
-                	if (alert.significance == "${sigs}") {
+                if (alerttype == "${notif}") {
+                    if (alert.significance == "${sigs}") {
 		     	        def msg1 = msg.replaceAll("SUN","SUNDAY")
 	    		        def msg2 = msg1.replaceAll("MON","MONDAY")
 						def msg3 = msg2.replaceAll("TUE","TUESDAY")
@@ -99,9 +111,9 @@ def Alerts(evt)  {
 						def msg6 = msg5.replaceAll("FRI","FRIDAY")
 						def msg7 = msg6.replaceAll("SAT","SATURDAY")
     	            	def msg8 = msg7.replaceAll("CST","")
-						log.debug "${msg8}"
-						sendNotificationEvent("${msg8}")
-						speaker.playAnnouncement("wop, wop, wop, wop, wop, ${msg8}")
+						log.debug "${msg8}, ${textdescription}"
+						sendNotificationEvent("${msg8}, ${textdescription}")
+						speaker.playAnnouncement("wop, wop, wop, wop, wop, ${msg8}, ${textdescription}")
                    }     
                 }    
             }
@@ -111,32 +123,54 @@ def Alerts(evt)  {
             }
         }
 	manlTrigger.off()
-}	
+}
 
 
 def manlAlerts(evt)  {
-	def alerts = getTwcAlerts("46.916505,-96.792531")
-        if (alerts) {
+    def result = getTwcLocation(zipCode)
+    def latitude = result.location['latitude']
+    def longitude = result.location['longitude']
+
+    def alerts = getTwcAlerts("${latitude},${longitude}")
+    if (alerts) {
             alerts.eachWithIndex {alert,index ->
-                def msg = alert.headlineText
-                if (alert.effectiveTimeLocal && !msg.contains(" from ")) {
-                    msg += " from ${parseAlertTime(alert.effectiveTimeLocal).format("E hh:mm a", TimeZone.getTimeZone(alert.effectiveTimeLocalTimeZone))}"
+                def key = alert.detailKey
+                def detail = getTwcAlertDetail(key)
+                def msg = detail.alertDetail['headlineText']
+                def alerttext = detail.alertDetail['texts']
+                def textdescription = alerttext.description
+                def textoverview = alerttext.overview
+                if (detail.alertDetail['effectiveTimeLocal'] && !msg.contains(" from ")) {
+                    msg += " from ${parseAlertTime(detail.alertDetail['effectiveTimeLocal']).format("E hh:mm a", TimeZone.getTimeZone(detail.alertDetail['effectiveTimeLocal']))}"
                 }
-                if (alert.expireTimeLocal && !msg.contains(" until ")) {
-                    msg += " until ${parseAlertTime(alert.expireTimeLocal).format("E hh:mm a", TimeZone.getTimeZone(alert.expireTimeLocalTimeZone))}"
+                if (detail.alertDetail['expireTimeLocal'] && !msg.contains(" until ")) {
+                    msg += " until ${parseAlertTime(detail.alertDetail['expireTimeLocal']).format("E hh:mm a", TimeZone.getTimeZone(detail.alertDetail['expireTimeLocal']))}"
                 }
-            def msg1 = msg.replaceAll("SUN","SUNDAY")
-            def msg2 = msg1.replaceAll("MON","MONDAY")
-			def msg3 = msg2.replaceAll("TUE","TUESDAY")
-			def msg4 = msg3.replaceAll("WED","WEDNESDAY")
-			def msg5 = msg4.replaceAll("THU","THURSDAY")
-			def msg6 = msg5.replaceAll("FRI","FRIDAY")
-			def msg7 = msg6.replaceAll("SAT","SATURDAY")
-            def msg8 = msg7.replaceAll("CST","")
-			log.debug "${msg8}"
-			speaker.playAnnouncement("wop, wop, wop, wop, wop, ${msg8}")
-            log.debug "${alert.significance}"
-        }    
+			log.debug "${msg}"
+            log.debug "$state.prevalerts"
+            def alerttype = alert.phenomena
+            def signif = alert.significance
+            if (alerttype != state.prevalerts[index] || signif != state.signific[index]) {
+                if (alerttype == "${notif}") {
+                    if (alert.significance == "${sigs}") {
+		     	        def msg1 = msg.replaceAll("SUN","SUNDAY")
+	    		        def msg2 = msg1.replaceAll("MON","MONDAY")
+						def msg3 = msg2.replaceAll("TUE","TUESDAY")
+						def msg4 = msg3.replaceAll("WED","WEDNESDAY")
+						def msg5 = msg4.replaceAll("THU","THURSDAY")
+						def msg6 = msg5.replaceAll("FRI","FRIDAY")
+						def msg7 = msg6.replaceAll("SAT","SATURDAY")
+    	            	def msg8 = msg7.replaceAll("CST","")
+						log.debug "${msg8}, ${textdescription}"
+						sendNotificationEvent("${msg8}, ${textdescription}")
+						speaker.playAnnouncement("wop, wop, wop, wop, wop, ${msg8}, ${textdescription}")
+                   }     
+                }    
+            }
+            state.prevalerts[index] = alerttype
+            state.signific[index] = signif
+            log.debug "$index, $alerttype, $state.prevalerts"
+            }
         }
         else {
             log.debug "No current alerts"
@@ -145,9 +179,3 @@ def manlAlerts(evt)  {
 	manlTrigger.off()
 }	
 
-speaker.each {device ->
-	if (device.wasLastSpokenToDevice == "repeat weather alert") {
-		device.playText("test device")
-
-	}
-}
