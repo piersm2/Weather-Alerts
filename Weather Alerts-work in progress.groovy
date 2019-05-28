@@ -30,10 +30,10 @@ preferences {
             input(name: "zipCode", title: "ZipCode", type: "string", mulitple: false, required: true)
     }
     section("Manual Weather Check") {
- 		      input(name: "manlTrigger", title: "Manual Trigger To Repeat Weather Alert", type: "capability.switch", multiple: false, required: false)
+ 		      input(name: "manlTrigger", title: "Manual Trigger To Repeat Weather Alert", type: "capability.switch", multiple: false, required: true)
 		}	
     section("Notification Device") {
-	          input(name: "speaker", title: "Alert Speaker", type: "capability.audioNotification", multiple: true, required: false)
+	          input(name: "speaker", title: "Alert Speaker", type: "capability.audioNotification", multiple: true, required: true)
 		}
     section("Significances") {
         input(name: "sigs", type: "enum", title: "Significance Types", multiple: true, options: [["W":"Warning"],["A":"Watch"],["Y":"Advisory"],["S":"Statement"],["F":"Forecast"],["O":"Outlook"],["N":"Synopsis"]])
